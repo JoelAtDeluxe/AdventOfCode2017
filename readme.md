@@ -73,15 +73,10 @@ let n = the starting number
    2. Note: We will always be on the outer edge of the grid with this approach.
 2. Calculate N, E, S, W axis values. Will only need to calculate each axis for x, where x = grid_length/2 (rounded down)
 3. Do some checks:
-   * if `x > E && x < N` => Quadrant 1 (NE)
-   * If `x > N && x < W` => Quadrant 2 (NW)
-   * if `x > W && x < S` => Quadrant 3 (SW)
-   * If `x > W && x > E` => Quadrant 4 (SE)
-   * If `x` is equal to `N, S, E, W` then already on the axis. steps remaining = n 
+   * if `x <  E` => Quadrant 4 (SE) -> steps to axis = (E - val) [We are moving towards East]
+   * If `x <= N` => Quadrant 1 (NE) -> Steps to axis = min(N - val, val - E) [Moving towards closest axis]
+   * If `x <= W` => Quadrant 2 (NW) -> Steps to axis = min(W - val, val - N) [Moving towards closest axis]
+   * If `x <= S` => Quadrant 3 (SW) -> Steps to axis = min(S - val, val - W) [Moving towards closest axis]
+   * Else (`x > S`) Quadrant 4 (SE) -> steps to axis = val - S
+   * Then `x` is equal to `N, S, E, W`. steps remaining = n 
    * (Anything else must be an error)
-4. If you are in a quadrant, move towards the closest axis.
-   * Quad 1 => min(x - E, N - x) [this will be the number of steps we need to take to reach the axis]
-   * Quad 2 => min(x - N, W - x)
-   * Quad 3 => min(x - W, S - x)
-   * Quad 4 => min(x - S, E - x) # This one is flawed. Choose the lowest number that's greater than 0
-   * 
