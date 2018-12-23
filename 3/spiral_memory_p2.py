@@ -25,6 +25,12 @@ def grow_grid(starting_grid):
     return grid
 
 
+def is_odd(num):
+    if int(num) != num:
+        return False
+    return (num % 2) == 1
+    
+
 def gen_directions():
     # These are actually in (y, x), since the first index represents which row, while the 2nd index represents the column
     # Also note that the pattern is what's importnat. Swapping which is 1 and -1 changes the spiral direction, but
@@ -58,27 +64,53 @@ def spiral_traverse(grid):
                 x = center + offsets[0]
                 y = center + offsets[1]
                 grid = yield grid, x, y
-                new_center = int(len(grid) // 2)
-                if new_center != center:
-                    offsets[0], offsets[1] = offsets[0] + 1, offsets[1] + 1
-                    center = new_center
-
+                center = int(len(grid) // 2)
+                
             heading = next(direction)
         steps += 1
 
+
+def sum_neighbors(grid, x, y):
+    def get(a, b):
+        if a < 0 or b < 0 or a >= len(grid) or b >= len(grid):
+            return 0
+        return grid[a][b]
+
+    adjacent_cell_values = [
+        get(x + 0, y + 1),
+        get(x - 1, y + 1),
+        get(x - 1, y + 0),
+        get(x - 1, y - 1),
+        get(x + 0, y - 1),
+        get(x + 1, y - 1),
+        get(x + 1, y + 0),
+        get(x + 1, y + 1),
+    ]
+
+    return sum(adjacent_cell_values)
+    
 
 def main():
     grid = build_grid(3)
     cell = spiral_traverse(grid)
 
     grid, x, y = cell.send(None)
-    for i in range(1, 17):
-        if is_odd(math.sqrt(i)) and len(grid) == math.sqrt(i):
+    target = 265149
+    cells_encountered = 1
+    last_val = 1
+    while last_val < target:
+        cells_encountered += 1
+        root = math.sqrt(cells_encountered)
+        if is_odd(root) and len(grid) == root:
             grid = grow_grid(grid)
-        grid[x][y] = i + 1
+            x, y = x + 1, y + 1
+        last_val = sum_neighbors(grid, x, y)
+        grid[x][y] = last_val
         grid, x, y = cell.send(grid)
     
+    print(f'The answer is: {last_val}')
     print_grid(grid)
+
 
 if __name__ == "__main__":
     main()
