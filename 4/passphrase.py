@@ -19,7 +19,7 @@ if __name__ == '__main__':
         return len(sorted_words) == len(set(sorted_words))
 
     intermediate = map(lambda x: x.split(), passphrases)
-    # intermediate = filter(has_no_repeat_words, intermediate)  # agagram work does the same thing
+    # intermediate = filter(has_no_repeat_words, intermediate)  # anagram work does the same thing
     intermediate = filter(has_no_anagrams, intermediate) 
     valid_passwords = list(intermediate)
     
