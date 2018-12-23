@@ -32,4 +32,4 @@ def part_two_logic(value):
 _maze = load_file('input.txt')
 
 # navigate_maze(_maze, plus_one)  # p1 solution
-navigate_maze(_maze, part_two_logic)  # p1 solution
+navigate_maze(_maze, part_two_logic)  # p2 solution
