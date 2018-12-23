@@ -48,6 +48,7 @@ def navigate(start):
 
     return walking_steps
 
+
 print(f'{1} => {navigate(1)}')
 print(f'{2} => {navigate(2)}')
 print(f'{3} => {navigate(3)}')
