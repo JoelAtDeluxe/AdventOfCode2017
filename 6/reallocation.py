@@ -45,4 +45,6 @@ while blocks != base_config:
     count += 1
 
 
-print(f'{base_count} / {base_config} -> {count} ({blocks})')
+# print(f'{base_count} / {base_config} -> {count} ({blocks})')
+print(f'Solution part 1: {base_count}')
+print(f'Solution part 2: {count - base_count}')
