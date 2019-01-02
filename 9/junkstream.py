@@ -22,7 +22,7 @@ def main():
                 advance_char = True
             elif char == '>':
                 currently_reading_junk = False
-                removed_char_count += idx - last_junk_index - 1
+                removed_char_count += idx - last_junk_index - 1  # -1 to remove the "<" that is counted as part of the range
         else:
             if char == '{':
                 group_nesting += 1
