@@ -44,33 +44,38 @@ def main():
         steps[right] -= steps_center
         steps[center] += steps_center
 
+    def reduce_steps():
+        cancel_short_loops('n', 'se', 'sw')
+        cancel_short_loops('s', 'ne', 'nw')
+        cancel_opposite_directions('n', 's')
+        cancel_opposite_directions('ne', 'sw')
+        cancel_opposite_directions('nw', 'se')
+        merge_adjacent_directions('nw', 'n', 'ne')
+        merge_adjacent_directions('n', 'ne', 'se')
+        merge_adjacent_directions('ne', 'se', 's')
+        merge_adjacent_directions('se', 's', 'sw')
+        merge_adjacent_directions('s', 'sw', 'nw')
+        merge_adjacent_directions('sw', 'nw', 'n')
+        return {k: v for k, v in steps.items()}
+
+    def calc_steps(some_steps):
+        # Should be reduced first
+        return sum(some_steps.values())
+
+    wander_distance = 0
+    distance_from_home = 0
+
     # Chart the overall steps
     for action in actions:
         steps[action] += 1
-    
-    # Cancel out "loops" -- taking these steps in any order returns to the origin
-    cancel_short_loops('n', 'se', 'sw')
-    cancel_short_loops('s', 'ne', 'nw')
+        steps = reduce_steps()
+        distance_from_home = calc_steps(steps)
+        if wander_distance < distance_from_home:
+            wander_distance = distance_from_home
 
-    # cancel out steps in opposite directions
-    cancel_opposite_directions('n', 's')
-    cancel_opposite_directions('ne', 'sw')
-    cancel_opposite_directions('nw', 'se')
-
-    # At this point, we've now moved vaguely in one direction: vaguely north (n, ne, nw), vaguely north east (n, ne, se), etc.
-    # These can be merged together
-    merge_adjacent_directions('nw', 'n', 'ne')
-    merge_adjacent_directions('n', 'ne', 'se')
-    merge_adjacent_directions('ne', 'se', 's')
-    merge_adjacent_directions('se', 's', 'sw')
-    merge_adjacent_directions('s', 'sw', 'nw')
-    merge_adjacent_directions('sw', 'nw', 'n')
-
-    final_steps = {k: v for k, v in steps.items() if v != 0}
-    min_steps = sum(final_steps.values())
-    print(f'Fewest steps: {min_steps}, directions: {final_steps}')
+    print(f'Fewest steps: {distance_from_home}, directions: {steps}')
+    print(f'Furthest away: {wander_distance}')
 
 
 if __name__ == "__main__":
     main()
-    
