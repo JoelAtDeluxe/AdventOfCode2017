@@ -41,15 +41,24 @@ def approach_one(routes, connected_to=0):
         to_be_connected.append_list(routes[pipe])
         connected_pipes.append(pipe)
 
-    return len(connected_pipes)
+    return connected_pipes
 
 
 def main():
     routes = parse_input()
-    target = 0
-    result = approach_one(routes, connected_to=target)
+    group_count = 0
+    identified_routes = []
 
-    print(f'There are {result} pipes connected to {target}')
+    for target in range(len(routes)):
+        if target in identified_routes:
+            continue
+
+        result = approach_one(routes, connected_to=target)
+        identified_routes = [*identified_routes, *result]
+        group_count += 1
+        print(f'There are {len(result)} pipes connected to {target}')
+
+    print(f"\nAll in all, I identified {group_count} groups")
 
 
 if __name__ == "__main__":
