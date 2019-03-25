@@ -13,16 +13,45 @@ def parse_input():
 
 
 def main():
-    # parsed_scanners = parse_input()
-    parsed_scanners = [(0, 3), (1, 2), (4, 4), (6, 4)]
-    scanners = [Scanner(t) for t in parsed_scanners]
+    parsed_scanners = parse_input()
+    # parsed_scanners = [(0, 3), (1, 2), (4, 4), (6, 4)]
+    scanners = [Scanner(*t) for t in parsed_scanners]
     max_layer = scanners[-1].layer
 
+    step = 0
+    # part 1
+    sev, _ = calc_severity(scanners, max_layer, step)
+    print(f'severity on step: {step} is: {sev}')
+
+    # part 2
+    stop_checking = False
+    step = 0
+
+    while not stop_checking:
+        _, stopped_early = calc_severity(scanners, max_layer, step, True)
+        if stopped_early:
+            step += 1
+        else:
+            stop_checking = True
+
+    print(f"Found safe path on second: {step}")
+
+
+def calc_severity(scanners, num_layers, step_num, stop_on_collision=False):
     severity = 0
-    for packet_pos in range(max_layer+1):
-        # step on
-        if scanners[packet_pos].position == 0:
-            severity += scanners[packet_pos].get_severity()
+    layer_ptr = 0
+
+    for layer_sec in range(num_layers+1):
+        next_scanner = scanners[layer_ptr]
+        if layer_sec == next_scanner.layer:
+            layer_ptr += 1
+            if next_scanner.pos_at_step(step_num) == 0:
+                if stop_on_collision:
+                    return severity, True
+                else:
+                    severity += next_scanner.severity
+
+    return severity, False
 
 
 class Scanner(object):
@@ -36,10 +65,18 @@ class Scanner(object):
     def from_tuple(cls, t):
         return cls(t[0], t[1])
 
+    @property
+    def offset(self):
+        return self.layer
+    
     def advance(self):
         self.position = (self.position + 1) % self.true_depth
 
-    def get_severity(self):
+    def pos_at_step(self, step_num):
+        return (self.layer + step_num) % self.true_depth
+        
+    @property
+    def severity(self):
         return self.depth * self.layer
 
 if __name__ == "__main__":
