@@ -20,13 +20,13 @@ def main():
 
     step = 0
     # part 1
-    sev = calc_severity(scanners, max_layer, step)
+    sev, stop_layer = calc_severity(scanners, max_layer, step)
     print(f'severity on step: {step} is: {sev}')
 
         
 
-def calc_severity(scanners, num_layers, step_num):
-    severty = 0
+def calc_severity(scanners, num_layers, step_num, stop_on_nonzero=False):
+    severity = 0
     layer_ptr = 0
     
     for layer_sec in range(num_layers+1):
@@ -35,6 +35,10 @@ def calc_severity(scanners, num_layers, step_num):
             layer_ptr += 1
             if next_scanner.pos_at_step(step_num) == 0:
                 severity += next_scanner.severity
+                        if stop_on_nonzero and severity > 0:
+            return severity, layer_sec
+                
+    return severity, num_layers+1
 
 class Scanner(object):
     def __init__(self, layer, depth):
