@@ -26,10 +26,9 @@ def main():
     # part 2
     stop_checking = False
     step = 0
-    
+
     while not stop_checking:
         _, stopped_early = calc_severity(scanners, max_layer, step, True)
-        # import pdb; pdb.set_trace()
         if stopped_early:
             step += 1
         else:
@@ -68,7 +67,7 @@ class Scanner(object):
 
     @property
     def offset(self):
-        return self.depth
+        return self.layer
     
     def advance(self):
         self.position = (self.position + 1) % self.true_depth
