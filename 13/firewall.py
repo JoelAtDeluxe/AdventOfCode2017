@@ -26,10 +26,12 @@ def main():
     # part 2
     stop_checking = False
     step = 0
+    
     while not stop_checking:
-        sev, stopped_early = calc_severity(scanners, max_layer, step)
+        _, stopped_early = calc_severity(scanners, max_layer, step, True)
+        # import pdb; pdb.set_trace()
         if stopped_early:
-            stop += 1
+            step += 1
         else:
             stop_checking = True
 
@@ -45,9 +47,10 @@ def calc_severity(scanners, num_layers, step_num, stop_on_collision=False):
         if layer_sec == next_scanner.layer:
             layer_ptr += 1
             if next_scanner.pos_at_step(step_num) == 0:
-                severity += next_scanner.severity
                 if stop_on_collision:
                     return severity, True
+                else:
+                    severity += next_scanner.severity
 
     return severity, False
 
