@@ -1,17 +1,16 @@
 from typing import List
 
 class KnotHash(object):
-    def __init__(self, sparse_hash, ops=None):
-        self.sparse_hash = sparse_hash
-        self.ops = KnotHash._default_ops()
+    def __init__(self, ops, sparse_hash=None, use_ops_suffix=True):
+        self.sparse_hash = [i for i in range(256)] if sparse_hash is None else sparse_hash
+        self.ops = KnotHash._encode_ops(ops, use_ops_suffix)
 
     @staticmethod
-    def _default_ops():
-        ops_str = "88,88,211,106,141,1,78,254,2,111,77,255,90,0,54,205"
-        suffix = [17, 31, 73, 47, 23]
-        ops = [ord(i) for i in ops_str]
-        ops = [*ops, *suffix]
-        return ops
+    def _encode_ops(base, use_suffix):
+        suffix = [17, 31, 73, 47, 23] if use_suffix else []
+        ops = base if type(base) == list else [ord(i) for i in base]
+        return [*ops, *suffix]
+        
 
     def knot_hash(self, num_rounds=64):
         cur_pos = 0

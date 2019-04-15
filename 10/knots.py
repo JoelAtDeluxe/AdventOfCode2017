@@ -4,7 +4,7 @@ from knot_lib import KnotHash
 def main(use_real=True, part_one=False):
     sparse_hash, ops, rounds = load_data(use_real, part_one)
 
-    kh = KnotHash(sparse_hash, ops)
+    kh = KnotHash(ops, sparse_hash, use_ops_suffix=not(use_real))
     kh.knot_hash(rounds)
     
     print(f"After {rounds} round(s), CheckProduct for sparse hash is: {kh.check_product}")
