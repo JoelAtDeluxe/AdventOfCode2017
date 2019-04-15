@@ -45,39 +45,44 @@ def main():
     region_count = count_regions(rows)
     print(f"There are {region_count} regions")
 
-    
 
-
-def traverse_grid(grid, position, spread, diagonals=False):
-    next_wave = set([position])
+def traverse_grid(grid, positions, spread, diagonals=False):
+    victims = set(positions if type(positions) == list else [positions])
     max_row, max_col = len(grid), len(grid[0])  # assumed to be nxm
-    visited = [[False] * max_col for _ in range(max_row)]
+    innoculations = [[False] * max_col for _ in range(max_row)]
 
-    # Optionally, also call spread from this point.
-    # breakpoint()
-    visited[position[0]][position[1]] = True
+    def innocuated(coordinate):
+        r, c = coordinate
+        # check ranges
+        if not(0 <= r < max_row) or not(0 <= c < max_col):
+            return True
+        return innoculations[r][c]
 
-    while len(next_wave) > 0:
-        spread_to = set()
-        for r, c in next_wave:
+    def vacinate(coordinate):
+        r, c = coordinate
+        if 0 <= r < max_row and 0 <= c < max_col:
+            innoculations[r][c] = True
+
+    while len(victims) != 0:
+        quarantine = set()
+
+        # infect the cells
+        for cell in victims:
+            vacinate(cell)
+            if spread(grid, cell[0], cell[1]):
+                quarantine.add(cell)
+
+        # spread to next victims
+        victims = set() # really future victims at this point
+        for r, c in quarantine:
             north, south = (r - 1), (r + 1)
             east, west = (c + 1), (c - 1)
-            spread_to.update( [(north, c), (south, c)] )
-            spread_to.update( [(r, west), (r, east)] )
+            victims.update( [(north, c), (south, c), (r, east), (r, west)] )
             if diagonals:
-                spread_to.add( (north, west) ) 
-                spread_to.add( (south, west) ) 
-                spread_to.add( (north, east) ) 
-                spread_to.add( (south, east) ) 
-        
-        next_wave = set()
+                victims.update([(north, east), (north, west), (south, east), (south, west)]) 
 
-        for d in spread_to:
-            if 0 <= d[0] < max_row and 0 <= d[1] < max_col:
-                if not visited[d[0]][d[1]]:
-                    visited[d[0]][d[1]] = True
-                    if spread(grid, d[0], d[1]):
-                        next_wave.add(d)
+        # Restrict infection to only those who have not yet been affected
+        victims = set([vic for vic in victims if not innocuated(vic)])
 
 
 def count_regions(memory):
