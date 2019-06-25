@@ -35,7 +35,7 @@ class DuetBase(object):
             DuetBase.OP_JMP_REG: self._op_jmp_reg,
             DuetBase.OP_JMP_NUM: self._op_jmp_num,
         }
-    
+
     @classmethod
     def from_script(cls, script):
         rtn = cls()
@@ -47,6 +47,18 @@ class DuetBase(object):
         rtn.preprocess(script)
 
         return rtn
+
+    # @classmethod
+    # def clone(cls, base_obj):
+    #     ## This doesn't work -- the dictionaries are indeed value-copies, but the function pointers
+    #     # are not getting updated.
+    #     rtn = cls()
+    #     rtn.registers = {**base_obj.registers}
+    #     rtn.instructions = [*base_obj.instructions]
+    #     rtn.std_lib = {**base_obj.std_lib}
+
+    #     return rtn
+
 
     @staticmethod
     def _parse_cmd_one_arity(op_if_int, op_if_reg, parts):
@@ -94,8 +106,7 @@ class DuetBase(object):
         for inst in self.instructions:
             symbols.extend([sym for sym in inst[1:] if type(sym) == str])
         self.registers = { k: 0 for k in set(symbols) }
-
-    
+   
     def process(self, on_op_result_func=lambda x: False):
         pc = 0
         cmd_len = len(self.instructions)
@@ -151,9 +162,88 @@ class DuetBase(object):
     def _op_jgz_reg(self, reg_check, reg_to): 
         return self._op_jgz_num(reg_check, self.registers[reg_to])
 
-    
-class DuetSingle(DuetBase):
+class SuspendError(Exception):
     pass
+
+class DuetProcess(object):
+    def __init__(self, pid:int, runtime:DuetBase):
+        self.runtime = runtime
+        self.runtime.registers['p'] = pid
+        self.runtime.std_lib.update({
+            DuetBase.OP_SND_REG: self._op_snd_reg,
+            DuetBase.OP_SND_NUM: self._op_snd_num,
+            DuetBase.OP_RCV_REG: self._op_rcv_reg,
+            DuetBase.OP_RCV_NUM: self._op_rcv_num,
+        })
+        self.pid = pid
+        self.companion: DuetProcess = None
+        self.queue_pos = 0
+        self.msg_queue = []
+        self.suspended_pc = 0
+        self.exe_step = 0
+        self.last_exe_steps = [-1, -2]
+        self.exited = False
+        self.suspend_count = 0
+    
+    def _op_snd_num(self, val, _):
+        self.companion.push(val)
+    
+    def _op_snd_reg(self, reg, _):
+        self._op_snd_num(self.runtime.registers[reg], _)
+
+    def _op_rcv_reg(self, reg, _):
+        next_val = self.pull()
+        if next_val is not None:
+            self.runtime.registers[reg] = next_val
+        else:
+            raise SuspendError()
+
+    # Now effectively a no op
+    def _op_rcv_num(self, _a, _b):
+        pass
+
+    def push(self, v):
+        self.msg_queue.append(v)
+    
+    def pull(self):
+        if self.queue_pos < len(self.msg_queue):
+            rtn = self.msg_queue[self.queue_pos]
+            self.queue_pos += 1
+            return rtn
+        else:
+            return None
+    
+    def process(self):
+        pc = self.suspended_pc
+        cmd_len = len(self.runtime.instructions)
+        mark_exited = True
+
+        while 0 <= pc < cmd_len:
+            cmd = self.runtime.instructions[pc]
+            action = self.runtime.std_lib.get(cmd[0])
+
+            if action == None:
+                print(f"Unknown command: {cmd[0]}. Please check script (instruction on line {pc+1})")
+                break
+            try:
+                result = action(*cmd[1:])
+
+                result = 1 if result is None else result
+                pc += result
+                
+                self.exe_step += 1
+            except SuspendError:
+                self.last_exe_steps[self.suspend_count % 2] = self.exe_step
+                self.suspended_pc = pc
+                print(f"Proccess pid({self.pid}) is suspending!")
+                mark_exited = False
+                self.suspend_count += 1
+                break
+        if mark_exited:
+            self.exited = True
+        
+    def is_stalled(self):
+        return self.last_exe_steps[0] == self.last_exe_steps[1]
 
 
 # We could also use inheritance here, but I'm going to opt for a module-like solution
