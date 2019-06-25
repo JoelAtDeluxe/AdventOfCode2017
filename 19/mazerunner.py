@@ -7,7 +7,7 @@ def load_data(path, real):
             "     A  |  C    \n" \
             " F---|----E|--+ \n" \
             "     |  |  |  D \n" \
-            "     +B-+  +--+ \n"
+            "     +B-+  +--+ "
     else:
         with open(path, 'r') as fh:
             grid = fh.read()
@@ -58,9 +58,9 @@ def traverse_grid(grid, start):
     current_pos = start
     direction = DOWN
     reached_end = False
+    steps_taken = 1  # we count the starting space as a step
 
     items_passed = []
-    # print(f"{current_pos} => {grid_at(grid, current_pos)}")
     
     while not reached_end:
         next_pos = add_tuple(current_pos, direction)
@@ -68,25 +68,32 @@ def traverse_grid(grid, start):
 
         if next_char == "+":
             next_pos, direction = find_next_path_step(current_pos, next_pos)
+            steps_taken += 1  # we skip over the cross here, but we really step on it
+            next_char = grid_at(grid, next_pos)
         elif next_char == ' ':
             reached_end = True
-        elif next_char not in ('-', '|'):
+            steps_taken -= 1  # we don't count this step -- we already reached our destination
+        
+        if next_char not in ('-', '|', ' ', '+'):
             items_passed.append(next_char)
         
+        steps_taken += 1  # we made a step here
         current_pos = next_pos
-        print(f"{current_pos} => {grid_at(grid, current_pos)}")
+        # print(f"{current_pos} => {grid_at(grid, current_pos)}")
     
-    return items_passed
+    return items_passed, steps_taken
 
 def main():
     grid = load_data('input.txt', real=True)
     start = find_starting_position(grid)
+    breakpoint()
 
-    # part 1
+    # part 1 & 2
     result = traverse_grid(grid, start)
 
-    print(''.join(result))
-    
+    print(f"Routing directions: {''.join(result[0])}")
+    print(f'Steps taken: {result[1]}')
+
 
 if __name__ == "__main__":
     main()
