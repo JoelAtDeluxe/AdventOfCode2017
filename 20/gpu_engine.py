@@ -30,7 +30,6 @@ def closest_particle_long_term(particles):
         print(min(range(len(particles)), key=min_fun))
         for p in particles:
             p.tick()
-        # breakpoint()
     
     index_min = min(range(len(particles)), key=min_fun)
     return index_min
@@ -52,20 +51,20 @@ def closest_particle_long_term_with_collision_culling(particles):
         if len(collisons) > 0:  # do the culling
             flatted_indexes = [v for lst in collisons for v in lst]
             unculled = [v for v in unculled if v.name not in flatted_indexes]
-        
-    min_item = min(unculled, key=lambda x: x.dist_from_origin())
-    return min_item.name
+    
+    return len(unculled)
+
 
 def main():
     particles = parse_input('input.txt')
 
     # part 1
-    result = closest_particle_long_term(particles)
-    print(result)
+    # result = closest_particle_long_term(particles)
+    # print(result)
 
     # part 2
-    # result = closest_particle_long_term_with_collision_culling(particles)
-    # print(result)
+    result = closest_particle_long_term_with_collision_culling(particles)
+    print(result)
 
 if __name__ == "__main__":
     main()
