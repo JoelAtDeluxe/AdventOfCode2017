@@ -15,9 +15,9 @@ class Particle(object):
         self.az = acceleration[2]
     
     def __repr__(self):
-        p = f'<{",".join(self.get_position_tuple())}>'
-        v = f'<{",".join(self.get_velocity_tuple())}>'
-        a = f'<{",".join(self.get_acceleration_tuple())}>'
+        p = f'<{",".join([str(v) for v in self.get_position_tuple()])}>'
+        v = f'<{",".join([str(v) for v in self.get_velocity_tuple()])}>'
+        a = f'<{",".join([str(v) for v in self.get_acceleration_tuple()])}>'
         return f'p={p}, v={v}, a={a}'
     
     def _clone(self):
@@ -78,3 +78,7 @@ class ParticleWithName(Particle):
         super().__init__(particle.get_position_tuple(), 
                          particle.get_velocity_tuple(), 
                          particle.get_acceleration_tuple())
+
+    def __repr__(self):
+        t = super().__repr__()
+        return f'[name={self.name} {t}]'
