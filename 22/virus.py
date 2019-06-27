@@ -6,11 +6,8 @@ class Virus(object):
         self.direction = Virus.NORTH
     
     def turn(self, right=True):
-        twist = 1 if right else -1
-
+        twist = 1 if right else 3  # left = right, right, right -- we can avoid a check this way
         self.direction = (self.direction + twist) % 4
-        if self.direction < Virus.NORTH:
-            self.direction = Virus.WEST
 
     @staticmethod
     def add_tuple(a, b):
@@ -33,4 +30,24 @@ class Virus(object):
         self.turn(infected)
         self.move()
         return '.' if infected else '#'
+
+
+class SmartVirus(Virus):
+    def __init__(self, row_count, col_count):
+        super().__init__(row_count, col_count)
+
+    def about_face(self):
+        self.direction = (self.direction + 2) % 4
+        
+    def on_cell_encountered(self, cell_value):
+        effect_action = {
+            '.': ('W', lambda : self.turn(False)),
+            'W': ('#', lambda : None),  # no-op
+            '#': ('F', lambda : self.turn(True)),
+            'F': ('.', lambda : self.about_face())
+        }
+        effect, action = effect_action[cell_value]
+        action()
+        self.move()
+        return effect
         

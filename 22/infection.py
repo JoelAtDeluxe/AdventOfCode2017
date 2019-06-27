@@ -1,4 +1,4 @@
-from virus import Virus
+from virus import Virus, SmartVirus
 
 
 def parse_input(path):
@@ -11,6 +11,17 @@ def parse_input(path):
 def print_grid(grid):
     for row in grid:
         print(row)
+
+
+def print_complex_grid(grid, position):
+    for r, row in enumerate(grid):
+        if r == position[0]:
+            start = ' '.join(row[:position[1]])
+            middle = f'[{row[position[1]]}]'
+            end = ' '.join(row[position[1]+1:])
+            print(start + middle + end)
+        else:
+            print( ' '.join(row) )
 
 
 def grow_grid(old_grid):
@@ -86,11 +97,14 @@ def main():
     starting_grid = parse_input('input.txt')
     # starting_grid = parse_input('alt-input.txt')
 
-    virus = Virus(*get_dimensions(starting_grid))
-
     # Part 1
-    new_grid, infec_count = simulate_phase_one(starting_grid, virus, 10000)
+    # virus, iterations = Virus(*get_dimensions(starting_grid)), 10_000
+    # Part 2
+    virus, iterations = SmartVirus(*get_dimensions(starting_grid)), 10_000_000
+    
+    new_grid, infec_count = simulate_phase_one(starting_grid, virus, iterations)
     # print_grid(new_grid)
+    # print_complex_grid(new_grid, virus.position)
     print(f'Tracked {infec_count} new infections')
 
 
