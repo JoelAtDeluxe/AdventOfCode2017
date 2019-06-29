@@ -236,7 +236,7 @@ class ComputeEngine(object):
     def _op_rt_dn_num(self, which, val):
         self.registers[which] = math.floor(math.sqrt(val))
 
-    def _op_rt_dn_reg(self, which, reg):
+    def _op_rt_dn_reg(self, which, reg):  #This should actually be a unary operator, really, it's sqrt(x) + set
         return self._op_rt_dn_num(which, self.registers[reg])
 
 
